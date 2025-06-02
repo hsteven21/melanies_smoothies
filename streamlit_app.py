@@ -46,3 +46,4 @@ if st.button("Submit Order"):
         
         # Ejecutar insert (pendiente de implementar con conexión externa)
         st.success(f"✅ Your Smoothie is ordered, {name_on_order}!")
+        #
