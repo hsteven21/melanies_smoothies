@@ -1,6 +1,5 @@
 # Import python packages
 import streamlit as st
-from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.functions import col
 
 # App title
@@ -12,16 +11,23 @@ name_on_order = st.text_input("Name on Smoothie:")
 if name_on_order:
     st.write("The name on your Smoothie will be:", name_on_order)
 
-# Conectar sesión y obtener frutas
-session = get_active_session()
-my_dataframe = session.table("smoothies.public.fruit_options").select(col("FRUIT_NAME"))
+# Conectar sesión a Snowflake - Se actualizará posteriormente para conexión externa
+# session = get_active_session()  # Esto ya no se usa
 
-# Lista de selección limitada a 5 elementos
-ingredients_list = st.multiselect(
-    "Choose up to 5 ingredients:",
-    my_dataframe.collect(),
-    max_selections=5
-)
+# Nota: En Streamlit externo necesitarás configurar la conexión manualmente luego
+
+# DataFrame (Pendiente configurar conexión)
+# my_dataframe = session.table("smoothies.public.fruit_options").select(col("FRUIT_NAME"))
+my_dataframe = None  # temporal, deberás configurarlo con conexión externa a Snowflake
+
+if my_dataframe:
+    ingredients_list = st.multiselect(
+        "Choose up to 5 ingredients:",
+        my_dataframe.collect(),
+        max_selections=5
+    )
+else:
+    ingredients_list = []
 
 # Botón submit y validaciones adicionales
 if st.button("Submit Order"):
@@ -38,5 +44,5 @@ if st.button("Submit Order"):
             VALUES ('{ingredients_string}', '{safe_name}', FALSE)
         """
         
-        session.sql(insert_stmt).collect()
+        # Ejecutar insert (pendiente de implementar con conexión externa)
         st.success(f"✅ Your Smoothie is ordered, {name_on_order}!")
