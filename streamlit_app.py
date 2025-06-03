@@ -17,9 +17,10 @@ if name_on_order:
 conn = st.connection("snowflake")
 session = conn.session()
 
-# Obtener opciones de fruta desde Snowflake
-my_dataframe = session.table("smoothies.public.fruit_options").select(col("FRUIT_NAME")).collect()
-fruit_options = [row["FRUIT_NAME"] for row in my_dataframe]
+# Obtener opciones de fruta desde Snowflake con columna SEARCH_ON
+fruit_df = session.table("smoothies.public.fruit_options").select("FRUIT_NAME", "SEARCH_ON").collect()
+fruit_options = [row["FRUIT_NAME"] for row in fruit_df]
+search_on_dict = {row["FRUIT_NAME"]: row["SEARCH_ON"] for row in fruit_df}
 
 # Multiselección limitada a 5 frutas
 ingredients_list = st.multiselect(
@@ -48,16 +49,13 @@ if st.button("Submit Order"):
 
 # Mostrar información nutricional para cada fruta elegida
 if ingredients_list:
-    ingredients_string = ''
     for fruit_chosen in ingredients_list:
-        ingredients_string += fruit_chosen + ' '
-        
-        # Añadir título para cada fruta
+        search_term = search_on_dict[fruit_chosen]
+
         st.subheader(f"{fruit_chosen} Nutrition Information")
-        
-        # Llamada a API con validación
-        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{fruit_chosen}")
-        
+
+        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_term}")
+
         if smoothiefroot_response.status_code == 200:
             sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
         else:
