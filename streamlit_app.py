@@ -46,11 +46,19 @@ if st.button("Submit Order"):
         session.sql(insert_stmt).collect()
         st.success(f"✅ Your Smoothie is ordered, {name_on_order}!")
 
-# Sección de información nutricional por cada fruta seleccionada
+# Mostrar información nutricional para cada fruta elegida
 if ingredients_list:
     ingredients_string = ''
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
-        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-        sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
-
+        
+        # Añadir título para cada fruta
+        st.subheader(f"{fruit_chosen} Nutrition Information")
+        
+        # Llamada a API con validación
+        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{fruit_chosen}")
+        
+        if smoothiefroot_response.status_code == 200:
+            sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+        else:
+            st.error(f"❌ Nutrition information for {fruit_chosen} is not available.")
