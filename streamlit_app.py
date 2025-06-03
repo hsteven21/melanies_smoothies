@@ -13,7 +13,7 @@ name_on_order = st.text_input("Name on Smoothie:")
 if name_on_order:
     st.write("The name on your Smoothie will be:", name_on_order)
 
-# Conexión a Snowflake usando secrets.toml (esto lo configuras en Streamlit Cloud)
+# Conexión a Snowflake usando secrets.toml
 conn = st.connection("snowflake")
 session = conn.session()
 
@@ -46,13 +46,11 @@ if st.button("Submit Order"):
         session.sql(insert_stmt).collect()
         st.success(f"✅ Your Smoothie is ordered, {name_on_order}!")
 
-# Nueva sección para llamar API SmoothieFroot
-st.header("🍉 SmoothieFroot Nutrition Information 🍉")
-
-smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-if smoothiefroot_response.status_code == 200:
-    sf_df = pd.DataFrame(smoothiefroot_response.json())
-    st.dataframe(sf_df, use_container_width=True)
-else:
-    st.error("❌ Failed to retrieve SmoothieFroot data.")
+# Sección de información nutricional por cada fruta seleccionada
+if ingredients_list:
+    ingredients_string = ''
+    for fruit_chosen in ingredients_list:
+        ingredients_string += fruit_chosen + ' '
+        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+        sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
 
